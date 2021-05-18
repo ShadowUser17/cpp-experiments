@@ -24,6 +24,11 @@ int str_to_id(const char *str_item, const int str_size) {
 }
 
 
+size_t get_dir_item_size(const char *dir_root, const int root_size, const char *dir_item, const int item_size) {
+    return root_size + strnlen(dir_item, item_size) + 2;
+}
+
+
 struct dirent *get_dir_items(const char *dir_path, int *items_count) {
     DIR *dir_ptr = opendir(dir_path);
 
@@ -109,7 +114,7 @@ void print_dir_items(struct dirent *dir_items, int items_count, char mode) {
 
 
 char **dir_items_to_string(const char *dir_root, int root_size, struct dirent *dir_items, int items_count) {
-    char **str_items = (char**)malloc(sizeof(char*) * items_count);
+    char **str_items = (char**)calloc(items_count, sizeof(char*));
 
     if(str_items == NULL) {
         print_errno();
@@ -121,7 +126,7 @@ char **dir_items_to_string(const char *dir_root, int root_size, struct dirent *d
 
     for(int counter = 0; counter < items_count; counter++) {
         dir_item_size = strnlen(dir_items[counter].d_name, 256) + 1;
-        str_items[counter] = (char*)malloc(sizeof(char) * (root_size + dir_item_size));
+        str_items[counter] = (char*)calloc((root_size + dir_item_size), sizeof(char));
 
         memcpy(str_items[counter], dir_root, (sizeof(char) * root_size));
 
@@ -136,6 +141,35 @@ char **dir_items_to_string(const char *dir_root, int root_size, struct dirent *d
 
     free(dir_items);
     return str_items;
+}
+
+
+void free_str_items(char **str_items, int items_count) {
+    for(int counter = (items_count - 1); counter > 0; counter--) {
+        free(str_items[counter]);
+    }
+
+    free(str_items);
+}
+
+
+char **extend_str_items(char **str_items, int *str_count, const char *dir_root, struct dirent *dir_items, int dir_count) {
+    int str_new_count = *str_count + dir_count;
+    int str_sub_count = 0;
+    char *item_tmp = NULL;
+
+    char **str_new_items = (char**)realloc(str_items, sizeof(char*) * str_new_count);
+
+    for(int counter = 0; counter < dir_count; counter++) {
+        item_tmp = str_items[*str_count+counter];
+        str_sub_count = get_dir_item_size(item_tmp, strlen(item_tmp), dir_items[counter].d_name, strnlen(item_tmp, 256));
+        str_new_items[counter] = (char*)calloc(str_sub_count, sizeof(char));
+        memcpy(&str_new_items[*str_count+counter], dir_items[counter].d_name, (sizeof(char) * str_sub_count));
+    }
+
+    free(dir_items);
+    *str_count = str_new_count;
+    return str_new_items;
 }
 
 
@@ -167,15 +201,6 @@ struct dirent *filter_dir_items(struct dirent *dir_items, int *items_count, char
     free(dir_items);
     *items_count = dir_new_count;
     return dir_new_items;
-}
-
-
-void free_str_items(char **str_items, int items_count) {
-    for(int counter = (items_count - 1); counter > 0; counter--) {
-        free(str_items[counter]);
-    }
-
-    free(str_items);
 }
 
 
