@@ -8,9 +8,6 @@
 #include <dirent.h>
 
 
-const char *HWMON_PATH = "/sys/class/hwmon";
-
-
 void print_errno(void) {
     fprintf(stderr, "%s\n", strerror(errno));
 }
@@ -35,7 +32,7 @@ struct dirent *get_dir_items(const char *dir_path, int *items_count) {
         return NULL;
     }
 
-    struct dirent *dir_items = malloc(sizeof(struct dirent));
+    struct dirent *dir_items = (struct dirent*)malloc(sizeof(struct dirent));
 
     if(dir_items == NULL) {
         print_errno();
@@ -53,7 +50,7 @@ struct dirent *get_dir_items(const char *dir_path, int *items_count) {
         memcpy(&dir_items[*items_count], item_ptr, sizeof(struct dirent));
         *items_count += 1;
 
-        dir_items = realloc(dir_items, (sizeof(struct dirent) * (*items_count + 1)));
+        dir_items = (struct dirent*)realloc(dir_items, (sizeof(struct dirent) * (*items_count + 1)));
 
         if(dir_items == NULL) {
             print_errno();
@@ -67,9 +64,10 @@ struct dirent *get_dir_items(const char *dir_path, int *items_count) {
 
 
 void sort_dir_items(struct dirent *dir_items, int items_count) {
-    struct dirent *item_tmp = malloc(sizeof(struct dirent));
+    struct dirent *item_tmp = (struct dirent*)malloc(sizeof(struct dirent));
 
     for(int counter1 = 0; counter1 < items_count; counter1++) {
+
         for(int counter2 = counter1 + 1; counter2 < items_count; counter2++) {
 
             if(str_to_id(dir_items[counter1].d_name, 256) > str_to_id(dir_items[counter2].d_name, 256)) {
@@ -106,7 +104,7 @@ void print_dir_items(struct dirent *dir_items, int items_count) {
 
 
 char **dir_items_to_string(const char *dir_root, int root_size, struct dirent *dir_items, int items_count) {
-    char **str_items = malloc(sizeof(char*) * items_count);
+    char **str_items = (char**)malloc(sizeof(char*) * items_count);
 
     if(str_items == NULL) {
         print_errno();
@@ -118,53 +116,69 @@ char **dir_items_to_string(const char *dir_root, int root_size, struct dirent *d
 
     for(int counter = 0; counter < items_count; counter++) {
         dir_item_size = strnlen(dir_items[counter].d_name, 256) + 1;
-        str_items[counter] = malloc(sizeof(char) * (root_size + dir_item_size));
+        str_items[counter] = (char*)malloc(sizeof(char) * (root_size + dir_item_size));
 
-        memcpy(str_items[counter], dir_root, (sizeof(char) * (root_size - 1)));
-        str_items[counter][root_size-1] = '/';
+        memcpy(str_items[counter], dir_root, (sizeof(char) * root_size));
 
-        memcpy(&str_items[counter][root_size], dir_items[counter].d_name, (sizeof(char) * dir_item_size));
+        if (str_items[counter][root_size-2] != '/') {
+            str_items[counter][root_size-1] = '/';
+            memcpy(&str_items[counter][root_size], dir_items[counter].d_name, (sizeof(char) * dir_item_size));
+        } else {
+            memcpy(&str_items[counter][root_size-1], dir_items[counter].d_name, (sizeof(char) * dir_item_size));
+        }
+
         //fprintf(stdout, "%s\n", str_items[counter]);
     }
 
+    free(dir_items);
     return str_items;
 }
 
 
+struct dirent *filter_dir_items(struct dirent *dir_items, int *items_count, char *flt_string) {
+    struct dirent *dir_new_items = NULL;
+    int dir_new_count = 0;
+
+    for(int counter = 0; counter < *items_count; counter++) {
+
+        if(strstr(dir_items[counter].d_name, flt_string)) {
+
+            if(dir_new_count == 0) {
+                dir_new_items = (struct dirent*)malloc(sizeof(struct dirent));
+
+            } else {
+                dir_new_items = (struct dirent*)realloc(dir_new_items, sizeof(struct dirent));
+            }
+
+            if(dir_new_items == NULL) {
+                print_errno();
+                return NULL;
+            }
+
+            dir_new_count += 1;
+            memcpy(&dir_new_items[dir_new_count-1], &dir_items[counter], sizeof(struct dirent));
+        }
+    }
+
+    free(dir_items);
+    *items_count = dir_new_count;
+    return dir_new_items;
+}
+
+
 void free_str_items(char **str_items, int items_count) {
-    /*for(int counter = 0; counter < items_count; counter++) {
+    for(int counter = (items_count - 1); counter > 0; counter--) {
         free(str_items[counter]);
-    }*/
+    }
 
     free(str_items);
 }
 
 
-void print_str_items(char **str_items, int items_size) {
-    for(int counter = 0; counter < items_size; counter++) {
+void print_str_items(char **str_items, int items_count) {
+    for(int counter = 0; counter < items_count; counter++) {
         fprintf(stdout, "%s\n", str_items[counter]);
     }
-}
-
-
-int save_str_items(const char *fname, char **str_items, int items_count) {
-    FILE *fd = fopen(fname, "w");
-
-    if(fd == NULL) {
-        print_errno();
-        return -1;
-    }
-
-    int item_size = 0;
-
-    for(int counter = 0; counter < items_count; counter++) {
-        item_size = strlen(str_items[counter]) + 1;
-        fwrite(str_items[counter], sizeof(char), item_size, fd);
-        fprintf(fd, "\n");
-    }
-
-    fclose(fd);
-    return 0;
 }
 
 #endif // __DIR_FUNC_H__
