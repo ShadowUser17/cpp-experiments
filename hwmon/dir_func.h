@@ -44,8 +44,6 @@ struct dirent *get_dir_items(const char *dir_path, int *items_count) {
 
     while((item_ptr = readdir(dir_ptr)) != NULL) {
         if(item_ptr->d_name[0] == '.') continue;
-        /*if(strncmp(item_ptr->d_name, ".", 256) == 0) continue;
-        if(strncmp(item_ptr->d_name, "..", 256) == 0) continue;*/
 
         memcpy(&dir_items[*items_count], item_ptr, sizeof(struct dirent));
         *items_count += 1;
@@ -82,22 +80,29 @@ void sort_dir_items(struct dirent *dir_items, int items_count) {
 }
 
 
-void print_dir_items(struct dirent *dir_items, int items_count) {
-    fprintf(stdout, "items: %d\n", items_count);
+void print_dir_items(struct dirent *dir_items, int items_count, char mode) {
+    fprintf(stdout, "Items: %d\n", items_count);
 
     for(int counter = 0; counter < items_count; counter++) {
 
-        switch(dir_items[counter].d_type) {
-            case DT_DIR: fprintf(stdout, "DIR: %s\n", dir_items[counter].d_name); break;
-            case DT_CHR: fprintf(stdout, "CHR: %s\n", dir_items[counter].d_name); break;
-            case DT_BLK: fprintf(stdout, "BLK: %s\n", dir_items[counter].d_name); break;
-            case DT_LNK: fprintf(stdout, "LNK: %s\n", dir_items[counter].d_name); break;
-            case DT_REG: fprintf(stdout, "REG: %s\n", dir_items[counter].d_name); break;
-            case DT_WHT: fprintf(stdout, "WTH: %s\n", dir_items[counter].d_name); break;
+        if(mode != -1) {
 
-            case DT_SOCK: fprintf(stdout, "SOCK: %s\n", dir_items[counter].d_name); break;
-            case DT_FIFO: fprintf(stdout, "FIFO: %s\n", dir_items[counter].d_name); break;
-            case DT_UNKNOWN: fprintf(stdout, "UNKNOWN: %s\n", dir_items[counter].d_name); break;
+            switch(dir_items[counter].d_type) {
+                case DT_DIR: fprintf(stdout,"DIR: %s\n", dir_items[counter].d_name); break;
+                case DT_CHR: fprintf(stdout, "CHR: %s\n", dir_items[counter].d_name); break;
+                case DT_BLK: fprintf(stdout, "BLK: %s\n", dir_items[counter].d_name); break;
+                case DT_LNK: fprintf(stdout, "LNK: %s\n", dir_items[counter].d_name); break;
+                case DT_REG: fprintf(stdout, "REG: %s\n", dir_items[counter].d_name); break;
+                case DT_WHT: fprintf(stdout, "WTH: %s\n", dir_items[counter].d_name); break;
+
+                case DT_SOCK: fprintf(stdout, "SOCK: %s\n", dir_items[counter].d_name); break;
+                case DT_FIFO: fprintf(stdout, "FIFO: %s\n", dir_items[counter].d_name); break;
+
+                default: fprintf(stdout, "UNKNOWN: %s\n", dir_items[counter].d_name);
+            }
+
+        } else {
+            fprintf(stdout, "%s\n", dir_items[counter].d_name);
         }
     }
 }
@@ -123,11 +128,10 @@ char **dir_items_to_string(const char *dir_root, int root_size, struct dirent *d
         if (str_items[counter][root_size-2] != '/') {
             str_items[counter][root_size-1] = '/';
             memcpy(&str_items[counter][root_size], dir_items[counter].d_name, (sizeof(char) * dir_item_size));
+
         } else {
             memcpy(&str_items[counter][root_size-1], dir_items[counter].d_name, (sizeof(char) * dir_item_size));
         }
-
-        //fprintf(stdout, "%s\n", str_items[counter]);
     }
 
     free(dir_items);
