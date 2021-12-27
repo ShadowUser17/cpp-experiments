@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
         //hwmons = filter_dir_items(hwmons, &hwmons_size, argv[2]);
         //hwmons = filter_dir_items(hwmons, &hwmons_size, "input");
 
-        str_items = extend_str_items(str_items, &str_size, hwmons, hwmons_size);
+        str_items = extend_str_items(str_items, &str_size, str_items[counter], hwmons, hwmons_size);
         /*if(hwmons != NULL) {
             //printf("%s\n", str_items[counter]);
             print_dir_items(hwmons, hwmons_size, -1);
