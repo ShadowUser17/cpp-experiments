@@ -1,5 +1,5 @@
-#ifndef __ARRAY__
-#define __ARRAY__
+#ifndef __CARRAY_H__
+#define __CARRAY_H__
 
 #include <stdlib.h>
 #include <string.h>
@@ -126,4 +126,4 @@ struct Array* array_append(struct Array* ptr, void* item, size_t type) {
     return NULL;
 }
 
-#endif // __ARRAY__
+#endif // __CARRAY_H__
