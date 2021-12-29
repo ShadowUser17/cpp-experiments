@@ -13,18 +13,14 @@ struct Array {
 
 
 int array_len(struct Array* ptr) {
-    if(ptr != NULL) {
-        return ptr->length;
-    }
+    if(ptr != NULL) return ptr->length;
 
     return -1;
 }
 
 
 int array_cap(struct Array* ptr) {
-    if(ptr != NULL) {
-        return ptr->capacity;
-    }
+    if(ptr != NULL) return ptr->capacity;
 
     return -1;
 }
@@ -43,7 +39,6 @@ void* array_index(struct Array* ptr, size_t type, int pos) {
 
 struct Array* array_init(size_t type, int cap) {
     struct Array* array = (struct Array*)malloc(sizeof(struct Array));
-
     if(array == NULL) return NULL;
 
     array->items = NULL;
@@ -53,12 +48,9 @@ struct Array* array_init(size_t type, int cap) {
     if(cap < 10) cap = 10;
 
     array->items = calloc(cap, type);
-
     if(array->items == NULL) return NULL;
 
     array->capacity = cap;
-
-    memset(array->items, 0, (type * cap));
     return array;
 }
 
@@ -72,25 +64,30 @@ void array_free(struct Array* ptr) {
 }
 
 
+void array_reset(struct Array* ptr, size_t type) {
+    if(ptr != NULL) {
+        memset(ptr->items, 0, (type * ptr->length));
+        ptr->length = 0;
+    }
+}
+
+
 int array_copy(struct Array* dst, struct Array* src, size_t type) {
     if((dst != NULL) && (src != NULL)) {
-        void* dst_index = NULL;
-        void* src_index = NULL;
-        int it = 0;
+        if(dst->capacity > src->length) {
+            memcpy(dst->items, src->items, (type * src->length));
+            dst->length = src->length;
 
-        while(it < src->length) {
-            dst_index = array_index(dst, type, it);
-            src_index = array_index(src, type, it);
+        } else {
+            dst->items = realloc(dst->items, (type * (src->length + 10)));
+            if(dst->items == NULL) return -1;
 
-            if((dst_index != NULL) && (src_index != NULL)) {
-                memcpy(dst_index, src_index, type);
-                dst->length += 1;
-                it += 1;
-
-            } else break;
+            memcpy(dst->items, src->items, (type * src->length));
+            dst->length = src->length;
+            dst->capacity = src->length + 10;
         }
 
-        return it;
+        return dst->length;
     }
 
     return -1;
