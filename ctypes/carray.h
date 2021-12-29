@@ -26,6 +26,13 @@ int array_cap(struct Array* ptr) {
 }
 
 
+int array_stop(struct Array* ptr) {
+    if(ptr == NULL) return -1;
+
+    return (ptr->length - 1);
+}
+
+
 void* array_index(struct Array* ptr, size_t type, int pos) {
     if(ptr != NULL) {
         if((pos > -1) && (pos < ptr->capacity)) {
@@ -79,9 +86,11 @@ int array_copy(struct Array* dst, struct Array* src, size_t type) {
             dst->length = src->length;
 
         } else {
-            dst->items = realloc(dst->items, (type * (src->length + 10)));
-            if(dst->items == NULL) return -1;
+            void* items = NULL;
+            items = realloc(dst->items, (type * (src->length + 10)));
+            if(items == NULL) return -1;
 
+            dst->items = items;
             memcpy(dst->items, src->items, (type * src->length));
             dst->length = src->length;
             dst->capacity = src->length + 10;
@@ -117,6 +126,22 @@ struct Array* array_append(struct Array* ptr, void* item, size_t type) {
                     return ptr;
                 }
             }
+        }
+    }
+
+    return NULL;
+}
+
+
+void* array_pop(struct Array* ptr, size_t type) {
+    if(ptr != NULL) {
+        int pos = ptr->length - 1;
+        if(pos < 0) return NULL;
+
+        void* item = array_index(ptr, type, pos);
+        if(item != NULL) {
+            ptr->length -= 1;
+            return item;
         }
     }
 
