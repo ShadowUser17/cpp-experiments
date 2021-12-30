@@ -148,4 +148,13 @@ void* array_pop(struct Array* ptr, size_t type) {
     return NULL;
 }
 
+
+void array_map(struct Array* ptr, void (*func)(void*), size_t type) {
+    if(ptr) {
+        for(int it = 0; it < ptr->length; it++) {
+            func(array_index(ptr, type, it));
+        }
+    }
+}
+
 #endif // __CARRAY_H__
