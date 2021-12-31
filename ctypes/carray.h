@@ -56,10 +56,6 @@ struct Array* array_init(size_t type, int cap) {
     struct Array* array = (struct Array*)malloc(sizeof(struct Array));
     if(!array) return NULL;
 
-    array->items = NULL;
-    array->length = 0;
-    array->capacity = 0;
-
     if(cap < 10) cap = 10;
 
     array->items = calloc(cap, type);
@@ -68,6 +64,7 @@ struct Array* array_init(size_t type, int cap) {
         return NULL;
     }
 
+    array->length = 0;
     array->capacity = cap;
     return array;
 }
