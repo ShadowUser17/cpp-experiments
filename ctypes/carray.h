@@ -212,8 +212,9 @@ struct Array* array_filter(struct Array* ptr, int (*func)(const void*), size_t t
 
 struct Array* array_slice(struct Array* ptr, int start, int stop, size_t type) {
     if(ptr) {
-        int ptr_len = (stop - start);
-        struct Array* new_ptr = array_init(type, ptr_len);
+        if((start < 0) || (start >= stop) || (stop > ptr->length)) return NULL;
+
+        struct Array* new_ptr = array_init(type, (stop - start + 10));
         if(!new_ptr) return NULL;
 
         void* item = NULL;
