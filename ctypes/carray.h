@@ -3,7 +3,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 
 
 struct Array {
@@ -27,13 +26,6 @@ int array_cap(struct Array* ptr) {
 }
 
 
-int array_stop(struct Array* ptr) {
-    if(!ptr) return -1;
-
-    return (ptr->length - 1);
-}
-
-
 void* array_index(struct Array* ptr, size_t type, int pos) {
     if(ptr) {
         if((pos > -1) && (pos < ptr->capacity)) {
@@ -42,6 +34,21 @@ void* array_index(struct Array* ptr, size_t type, int pos) {
     }
 
     return NULL;
+}
+
+
+int array_stop(struct Array* ptr) {
+    if(!ptr) return -1;
+
+    return (ptr->length - 1);
+}
+
+
+void array_reset(struct Array* ptr, size_t type) {
+    if(ptr) {
+        memset(ptr->items, 0, (type * ptr->length));
+        ptr->length = 0;
+    }
 }
 
 
@@ -56,7 +63,10 @@ struct Array* array_init(size_t type, int cap) {
     if(cap < 10) cap = 10;
 
     array->items = calloc(cap, type);
-    if(!array->items) return NULL;
+    if(!array->items) {
+        free(array);
+        return NULL;
+    }
 
     array->capacity = cap;
     return array;
@@ -72,14 +82,6 @@ void array_free(struct Array* ptr) {
 }
 
 
-void array_reset(struct Array* ptr, size_t type) {
-    if(ptr) {
-        memset(ptr->items, 0, (type * ptr->length));
-        ptr->length = 0;
-    }
-}
-
-
 int array_copy(struct Array* dst, struct Array* src, size_t type) {
     if(dst && src) {
         if(dst->capacity > src->length) {
@@ -87,11 +89,11 @@ int array_copy(struct Array* dst, struct Array* src, size_t type) {
             dst->length = src->length;
 
         } else {
-            void* items = NULL;
-            items = realloc(dst->items, (type * (src->length + 10)));
-            if(!items) return -1;
+            void* new_items = NULL;
+            new_items = realloc(dst->items, (type * (src->length + 10)));
+            if(!new_items) return -1;
 
-            dst->items = items;
+            dst->items = new_items;
             memcpy(dst->items, src->items, (type * src->length));
             dst->length = src->length;
             dst->capacity = src->length + 10;
@@ -151,7 +153,7 @@ void* array_pop(struct Array* ptr, size_t type) {
 
 
 void array_map(struct Array* ptr, void (*func)(void*), size_t type) {
-    if(ptr) {
+    if(ptr && func) {
         for(int it = 0; it < ptr->length; it++) {
             func(array_index(ptr, type, it));
         }
@@ -159,8 +161,29 @@ void array_map(struct Array* ptr, void (*func)(void*), size_t type) {
 }
 
 
-struct Array* array_filter(struct Array* ptr, bool (*func)(void*), size_t type) {
+struct Array* array_reverse(struct Array* ptr, size_t type) {
     if(ptr) {
+        if(ptr->length > 1) {
+            struct Array* new_ptr = array_init(type, ptr->capacity);
+            if(!new_ptr) return NULL;
+
+            void* item = NULL;
+            for(int it = ptr->length - 1; it >= 0; it--) {
+                item = array_index(ptr, type, it);
+                new_ptr = array_append(new_ptr, item, type);
+            }
+
+            array_free(ptr);
+            return new_ptr;
+        }
+    }
+
+    return NULL;
+}
+
+
+struct Array* array_filter(struct Array* ptr, int (*func)(void*), size_t type) {
+    if(ptr && func) {
         struct Array* new_ptr = array_init(type, 0);
         if(!new_ptr) return NULL;
 
