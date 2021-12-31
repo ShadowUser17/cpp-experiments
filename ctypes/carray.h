@@ -26,6 +26,13 @@ int array_cap(struct Array* ptr) {
 }
 
 
+int array_end(struct Array* ptr) {
+    if(!ptr) return -1;
+
+    return (ptr->length - 1);
+}
+
+
 void* array_index(struct Array* ptr, size_t type, int pos) {
     if(ptr) {
         if((pos > -1) && (pos < ptr->capacity)) {
@@ -37,14 +44,7 @@ void* array_index(struct Array* ptr, size_t type, int pos) {
 }
 
 
-int array_stop(struct Array* ptr) {
-    if(!ptr) return -1;
-
-    return (ptr->length - 1);
-}
-
-
-void array_reset(struct Array* ptr, size_t type) {
+void array_clear(struct Array* ptr, size_t type) {
     if(ptr) {
         memset(ptr->items, 0, (type * ptr->length));
         ptr->length = 0;
@@ -86,12 +86,12 @@ int array_copy(struct Array* dst, struct Array* src, size_t type) {
             dst->length = src->length;
 
         } else {
-            void* new_items = NULL;
-            new_items = realloc(dst->items, (type * (src->length + 10)));
+            void* new_items = realloc(dst->items, (type * (src->length + 10)));
             if(!new_items) return -1;
 
             dst->items = new_items;
             memcpy(dst->items, src->items, (type * src->length));
+
             dst->length = src->length;
             dst->capacity = src->length + 10;
         }
@@ -104,7 +104,7 @@ int array_copy(struct Array* dst, struct Array* src, size_t type) {
 
 
 struct Array* array_append(struct Array* ptr, void* item, size_t type) {
-    if(ptr) {
+    if(ptr && item) {
         if(ptr->length < ptr->capacity) {
             memcpy(array_index(ptr, type, ptr->length), item, type);
             ptr->length += 1;
@@ -127,6 +127,33 @@ struct Array* array_append(struct Array* ptr, void* item, size_t type) {
                 }
             }
         }
+    }
+
+    return NULL;
+}
+
+
+struct Array* array_extend(struct Array* dst, struct Array* src, size_t type) {
+    if(dst && src) {
+        if((dst->length + src->length) < dst->capacity) {
+            memcpy(array_index(dst, type, dst->length), src->items, (type * src->length));
+            dst->length = (dst->length + src->length);
+
+        } else {
+            void* ptr = realloc(dst->items, (type * (dst->length + src->length + 10)));
+            if(!ptr) return dst;
+
+            dst->items = ptr;
+            dst->capacity = (dst->length + src->length + 10);
+
+            for(int it = 0; it < src->length; it++) {
+                ptr = array_index(src, type, it);
+                memcpy(array_index(dst, type, dst->length), ptr, type);
+                dst->length += 1;
+            }
+        }
+
+        return dst;
     }
 
     return NULL;
@@ -214,8 +241,8 @@ struct Array* array_slice(struct Array* ptr, int start, int stop, size_t type) {
         struct Array* new_ptr = array_init(type, (stop - start + 10));
         if(!new_ptr) return NULL;
 
-        memcpy(new_ptr->items, array_index(ptr, type, start), (type * stop));
         new_ptr->length = (stop - start);
+        memcpy(new_ptr->items, array_index(ptr, type, start), (type * new_ptr->length));
         return new_ptr;
     }
 
