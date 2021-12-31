@@ -217,12 +217,8 @@ struct Array* array_slice(struct Array* ptr, int start, int stop, size_t type) {
         struct Array* new_ptr = array_init(type, (stop - start + 10));
         if(!new_ptr) return NULL;
 
-        void* item = NULL;
-        for(int it = start; it < stop; it++) {
-            item = array_index(ptr, type, it);
-            new_ptr = array_append(new_ptr, item, type);
-        }
-
+        memcpy(new_ptr->items, array_index(ptr, type, start), (type * stop));
+        new_ptr->length = (stop - start);
         return new_ptr;
     }
 
