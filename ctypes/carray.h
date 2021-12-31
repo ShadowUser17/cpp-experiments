@@ -209,4 +209,23 @@ struct Array* array_filter(struct Array* ptr, int (*func)(const void*), size_t t
     return NULL;
 }
 
+
+struct Array* array_slice(struct Array* ptr, int start, int stop, size_t type) {
+    if(ptr) {
+        int ptr_len = (stop - start);
+        struct Array* new_ptr = array_init(type, ptr_len);
+        if(!new_ptr) return NULL;
+
+        void* item = NULL;
+        for(int it = start; it < stop; it++) {
+            item = array_index(ptr, type, it);
+            new_ptr = array_append(new_ptr, item, type);
+        }
+
+        return new_ptr;
+    }
+
+    return NULL;
+}
+
 #endif // __CARRAY_H__
