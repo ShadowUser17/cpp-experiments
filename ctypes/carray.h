@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 
 struct Array {
@@ -155,6 +156,27 @@ void array_map(struct Array* ptr, void (*func)(void*), size_t type) {
             func(array_index(ptr, type, it));
         }
     }
+}
+
+
+struct Array* array_filter(struct Array* ptr, bool (*func)(void*), size_t type) {
+    if(ptr) {
+        struct Array* new_ptr = array_init(type, 0);
+        if(!new_ptr) return NULL;
+
+        void* item = NULL;
+        for(int it = 0; it < ptr->length; it++) {
+            item = array_index(ptr, type, it);
+
+            if(func(item)) {
+                new_ptr = array_append(new_ptr, item, type);
+            }
+        }
+
+        return new_ptr;
+    }
+
+    return NULL;
 }
 
 #endif // __CARRAY_H__
