@@ -6,7 +6,7 @@
 
 
 union Value {
-    long double c_cdouble;
+    long double c_ldouble;
     long long   c_llong;
     double      c_double;
     long        c_long;

@@ -152,11 +152,18 @@ void* array_pop(struct Array* ptr, size_t type) {
 }
 
 
-void array_map(struct Array* ptr, void (*func)(void*), size_t type) {
+void array_map(struct Array* ptr, void (*func)(const void*), size_t type) {
     if(ptr && func) {
         for(int it = 0; it < ptr->length; it++) {
             func(array_index(ptr, type, it));
         }
+    }
+}
+
+
+void array_sort(struct Array* ptr, int (*func)(const void*, const void*), size_t type) {
+    if(ptr && func) {
+        qsort(ptr->items, ptr->length, type, func);
     }
 }
 
@@ -182,7 +189,7 @@ struct Array* array_reverse(struct Array* ptr, size_t type) {
 }
 
 
-struct Array* array_filter(struct Array* ptr, int (*func)(void*), size_t type) {
+struct Array* array_filter(struct Array* ptr, int (*func)(const void*), size_t type) {
     if(ptr && func) {
         struct Array* new_ptr = array_init(type, 0);
         if(!new_ptr) return NULL;
