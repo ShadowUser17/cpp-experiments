@@ -5,14 +5,14 @@
 #include <string.h>
 
 
-struct String {
+typedef struct {
     char* items;
     int   length;
-};
+} String;
 
 
-struct String* string_init(void) {
-    struct String* string = (struct String*)malloc(sizeof(struct String));
+String* string_init(void) {
+    String* string = (String*)malloc(sizeof(String));
     if(!string) return NULL;
 
     string->items = (char*)calloc(16, sizeof(char));
@@ -28,7 +28,7 @@ struct String* string_init(void) {
 }
 
 
-void string_free(struct String* ptr) {
+void string_free(String* ptr) {
     if(!ptr) {
         if(ptr->items) free(ptr->items);
 
