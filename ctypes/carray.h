@@ -56,10 +56,6 @@ struct Array* array_init(size_t type, int cap) {
     struct Array* array = (struct Array*)malloc(sizeof(struct Array));
     if(!array) return NULL;
 
-    array->items = NULL;
-    array->length = 0;
-    array->capacity = 0;
-
     if(cap < 10) cap = 10;
 
     array->items = calloc(cap, type);
@@ -68,6 +64,7 @@ struct Array* array_init(size_t type, int cap) {
         return NULL;
     }
 
+    array->length = 0;
     array->capacity = cap;
     return array;
 }
@@ -217,12 +214,8 @@ struct Array* array_slice(struct Array* ptr, int start, int stop, size_t type) {
         struct Array* new_ptr = array_init(type, (stop - start + 10));
         if(!new_ptr) return NULL;
 
-        void* item = NULL;
-        for(int it = start; it < stop; it++) {
-            item = array_index(ptr, type, it);
-            new_ptr = array_append(new_ptr, item, type);
-        }
-
+        memcpy(new_ptr->items, array_index(ptr, type, start), (type * stop));
+        new_ptr->length = (stop - start);
         return new_ptr;
     }
 
