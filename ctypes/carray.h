@@ -36,7 +36,7 @@ int array_end(Array* ptr) {
 void* array_index(Array* ptr, size_t type, int pos) {
     if(ptr) {
         if((pos > -1) && (pos < ptr->capacity)) {
-            return (ptr->items + (type * pos));
+            return ((char*)ptr->items + (type * pos));
         }
     }
 
