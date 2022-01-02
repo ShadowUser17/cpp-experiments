@@ -108,7 +108,6 @@ Array* array_append(Array* ptr, void* item, size_t type) {
         if(ptr->length < ptr->capacity) {
             memcpy(array_index(ptr, type, ptr->length), item, type);
             ptr->length += 1;
-            return ptr;
 
         } else {
             void* new_items = realloc(ptr->items, (type * (ptr->capacity + 10)));
@@ -119,8 +118,9 @@ Array* array_append(Array* ptr, void* item, size_t type) {
 
             memcpy(array_index(ptr, type, ptr->length), item, type);
             ptr->length += 1;
-            return ptr;
         }
+
+        return ptr;
     }
 
     return NULL;
@@ -134,17 +134,14 @@ Array* array_extend(Array* dst, Array* src, size_t type) {
             dst->length = (dst->length + src->length);
 
         } else {
-            void* ptr = realloc(dst->items, (type * (dst->length + src->length + 10)));
-            if(!ptr) return dst;
+            void* new_items = realloc(dst->items, (type * (dst->length + src->length + 10)));
+            if(!new_items) return dst;
 
-            dst->items = ptr;
+            dst->items = new_items;
             dst->capacity = (dst->length + src->length + 10);
 
-            for(int it = 0; it < src->length; it++) {
-                ptr = array_index(src, type, it);
-                memcpy(array_index(dst, type, dst->length), ptr, type);
-                dst->length += 1;
-            }
+            memcpy(array_index(dst, type, dst->length), src->items, (type * src->length));
+            dst->length = (dst->length + src->length);
         }
 
         return dst;
