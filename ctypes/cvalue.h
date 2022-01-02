@@ -5,7 +5,7 @@
 #include <string.h>
 
 
-union Value {
+typedef union {
     long double c_ldouble;
     long long   c_llong;
     double      c_double;
@@ -14,6 +14,6 @@ union Value {
     int         c_int;
     short       c_short;
     char        c_char;
-};
+} Value;
 
 #endif // __CVALUE_H__
