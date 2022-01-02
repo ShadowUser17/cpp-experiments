@@ -5,9 +5,9 @@
 #include <string.h>
 
 
-struct String {
+typedef struct {
     char* items;
     int   length;
-};
+} String;
 
 #endif // __CSTRING_H__
