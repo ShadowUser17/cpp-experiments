@@ -90,10 +90,10 @@ int array_copy(Array* dst, Array* src, size_t type) {
             if(!new_items) return -1;
 
             dst->items = new_items;
-            memcpy(dst->items, src->items, (type * src->length));
-
-            dst->length = src->length;
             dst->capacity = src->length + 10;
+
+            memcpy(dst->items, src->items, (type * src->length));
+            dst->length = src->length;
         }
 
         return dst->length;
@@ -111,21 +111,15 @@ Array* array_append(Array* ptr, void* item, size_t type) {
             return ptr;
 
         } else {
-            Array* new_ptr = array_init(type, (ptr->capacity + 10));
+            void* new_items = realloc(ptr->items, (type * (ptr->capacity + 10)));
+            if(!new_items) return ptr;
 
-            if(new_ptr) {
-                if(array_copy(new_ptr, ptr, type) > 0) {
-                    array_free(ptr);
+            ptr->items = new_items;
+            ptr->capacity += 10;
 
-                    memcpy(array_index(new_ptr, type, new_ptr->length), item, type);
-                    new_ptr->length += 1;
-                    return new_ptr;
-
-                } else {
-                    array_free(new_ptr);
-                    return ptr;
-                }
-            }
+            memcpy(array_index(ptr, type, ptr->length), item, type);
+            ptr->length += 1;
+            return ptr;
         }
     }
 
@@ -241,7 +235,7 @@ Array* array_slice(Array* ptr, int start, int stop, size_t type) {
         Array* new_ptr = array_init(type, (stop - start + 10));
         if(!new_ptr) return NULL;
 
-        new_ptr->length = (stop - start);
+        new_ptr->length = stop - start;
         memcpy(new_ptr->items, array_index(ptr, type, start), (type * new_ptr->length));
         return new_ptr;
     }
