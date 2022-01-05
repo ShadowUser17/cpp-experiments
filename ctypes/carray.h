@@ -1,10 +1,6 @@
 #ifndef __CARRAY_H__
 #define __CARRAY_H__
 
-#include <stdlib.h>
-#include <string.h>
-
-
 typedef struct {
     void* items;
     int   length;
