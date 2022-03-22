@@ -7,7 +7,7 @@ typedef struct {
 } String;
 
 
-String* string_init(void);
+String* string_init(char* ptr, int size);
 
 void string_free(String* ptr);
 

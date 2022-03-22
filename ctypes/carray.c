@@ -52,7 +52,7 @@ Array* array_init(size_t type, int cap) {
 
     array->items = calloc(cap, type);
     if(!array->items) {
-        free(array);
+        free((void*)array);
         return NULL;
     }
 
@@ -66,7 +66,7 @@ void array_free(Array* ptr) {
     if(ptr) {
         if(ptr->items) free(ptr->items);
 
-        free(ptr);
+        free((void*)ptr);
     }
 }
 
