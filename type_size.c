@@ -1,7 +1,8 @@
 #include <stdio.h>
 
 
-int main(void) {
+int main(void)
+{
     printf("long double: %u\n", sizeof(long double));
     printf("long long:   %u\n", sizeof(long long));
     printf("double:      %u\n", sizeof(double));

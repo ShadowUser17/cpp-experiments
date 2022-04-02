@@ -6,7 +6,8 @@
 const char *HWMON_PATH = "/sys/class/hwmon";
 
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
     
     return 0;
 }

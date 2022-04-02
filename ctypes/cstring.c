@@ -4,7 +4,8 @@
 #include "cstring.h"
 
 
-String* string_init(char* ptr, int size) {
+String* string_init(char* ptr, int size)
+{
     String* string = (String*)malloc(sizeof(String));
     if(!string) return NULL;
 
@@ -35,7 +36,8 @@ String* string_init(char* ptr, int size) {
 }
 
 
-void string_free(String* ptr) {
+void string_free(String* ptr)
+{
     if(ptr) {
         if(ptr->items) free((void*)ptr->items);
 
